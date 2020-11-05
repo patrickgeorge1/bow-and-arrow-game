@@ -4,6 +4,7 @@
 #include <Core/Engine.h>
 #include "Transform2D.h"
 #include "Object2D.h"
+#include "Defines.h"
 
 
 using namespace std;
@@ -20,6 +21,8 @@ Tema1::~Tema1()
 
 void Tema1::Init()
 {
+
+	window->SetSize(init_window_width, init_window_height);
 	glm::ivec2 resolution = window->GetResolution();
 	auto camera = GetSceneCamera();
 	camera->SetOrthographic(0, (float)resolution.x, 0, (float)resolution.y, 0.01f, 400);
@@ -28,28 +31,23 @@ void Tema1::Init()
 	camera->Update();
 	GetCameraInput()->SetActive(false);
 
+
+
+
 	glm::vec3 corner = glm::vec3(0, 0, 0);
-	float squareSide = 100;
+	float squareSide = init_player_height;
 
-	// compute coordinates of square center
-	float cx = corner.x + squareSide / 2;
-	float cy = corner.y + squareSide / 2;
-
-	// initialize tx and ty (the translation steps)
-	translateX = 0;
-	translateY = 0;
-
-	// initialize sx and sy (the scale factors)
-	scaleX = 1;
-	scaleY = 1;
-
-	// initialize angularStep
-	angularStep = 0;
-
-
-	Mesh* square1 = Object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 0, 0), true);
+	// player
+	Mesh* square1 = Object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 1, 0), true);
 	AddMeshToList(square1);
 
+	// game area
+	this->game_area_height = init_window_height - init_scoreboard_height - init_powerbar_height;
+	this->game_area_width = init_window_width;
+
+	corner = glm::vec3(0, init_powerbar_height, 0);
+	Mesh* gameActionArea = Object2D::CreateRectangle("game_area", corner, this->game_area_width, this->game_area_height, glm::vec3(0.1f, 0.1f, 0.1f), true);
+	AddMeshToList(gameActionArea);
 
 }
 
@@ -66,11 +64,19 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
-	// TODO: update steps for translation, rotation, scale, in order to create animations
+	// TODO draw player
 	modelMatrix = glm::mat3(1);
-	modelMatrix *= Transform2D::Translate(150, 250);
-	// TODO: create animations by multiplying current transform matrix with matrices from Transform 2D
+	modelMatrix *= Transform2D::Translate(player_position.x, player_position.y);
 	RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+
+	// TODO draw scoreboard
+	RenderMesh2D(meshes["game_area"], shaders["VertexColor"], glm::mat3(1));
+
+	// TODO draw lifebar
+
+
+	// TODO draw objects
+	
 }
 
 void Tema1::FrameEnd()
@@ -80,6 +86,16 @@ void Tema1::FrameEnd()
 
 void Tema1::OnInputUpdate(float deltaTime, int mods)
 {
+	if (window->KeyHold(GLFW_KEY_W))
+	{
+		Position old = this->player_position;
+		this->player_position.setValue(old.x, glm::min(old.y + player_y_step, game_area_height - init_player_height + init_powerbar_height));
+	}
+	if (window->KeyHold(GLFW_KEY_S))
+	{
+		Position old = this->player_position;
+		this->player_position.setValue(old.x, glm::max(old.y - player_y_step, init_powerbar_height));
+	}
 
 }
 

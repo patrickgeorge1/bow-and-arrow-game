@@ -3,14 +3,15 @@
 #include <Component/SimpleScene.h>
 #include <string>
 #include <Core/Engine.h>
-
+#include "utils/Position.h"
+#include "Defines.h"
 
 class Tema1 : public SimpleScene {
 	public:
 		Tema1();
 		~Tema1();
-
 		void Init() override;
+
 
 	private:
 		void FrameStart() override;
@@ -26,10 +27,10 @@ class Tema1 : public SimpleScene {
 		void OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY) override;
 		void OnWindowResize(int width, int height) override;
 
-	protected:
-		// aici o sa pun variabilele din scena
-		glm::mat3 modelMatrix;
-		float translateX, translateY;
-		float scaleX, scaleY;
-		float angularStep;
+protected:
+	Position player_position = Position(init_player_x, init_player_y);
+	glm::mat3 modelMatrix;
+	int game_area_height;
+	int game_area_width;
+
 };
