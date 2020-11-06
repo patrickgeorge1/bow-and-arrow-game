@@ -37,17 +37,30 @@ void Tema1::Init()
 	glm::vec3 corner = glm::vec3(0, 0, 0);
 	float squareSide = init_player_height;
 
-	// player
-	Mesh* square1 = Object2D::CreateSquare("square1", corner, squareSide, glm::vec3(1, 1, 0), true);
-	AddMeshToList(square1);
-
-	// game area
+	// computing dependencies
 	this->game_area_height = init_window_height - init_scoreboard_height - init_powerbar_height;
 	this->game_area_width = init_window_width;
+	player_min_y = init_powerbar_height;
+	player_max_y = game_area_height - init_player_height + init_powerbar_height;
 
+
+	// player
+	corner = glm::vec3(0, 0, 0);
+	Mesh* player = Object2D::CreatePlayer("player", corner, squareSide, glm::vec3(0, 1, 1), false);
+	AddMeshToList(player);
+
+	// arrow
+	corner = glm::vec3(0, 0, 0);
+	Mesh* arrow = Object2D::CreateArrow("arrow", corner, squareSide, glm::vec3(0, 1, 1), false);
+	AddMeshToList(arrow);
+
+
+	// game area
 	corner = glm::vec3(0, init_powerbar_height, 0);
 	Mesh* gameActionArea = Object2D::CreateRectangle("game_area", corner, this->game_area_width, this->game_area_height, glm::vec3(0.1f, 0.1f, 0.1f), true);
 	AddMeshToList(gameActionArea);
+
+
 
 }
 
@@ -64,10 +77,18 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {
+
 	// TODO draw player
 	modelMatrix = glm::mat3(1);
 	modelMatrix *= Transform2D::Translate(player_position.x, player_position.y);
-	RenderMesh2D(meshes["square1"], shaders["VertexColor"], modelMatrix);
+	RenderMesh2D(meshes["player"], shaders["VertexColor"], modelMatrix);
+
+	// TODO draw arrow
+	modelMatrix = glm::mat3(1);
+	modelMatrix *= Transform2D::Translate(player_position.x, player_position.y + (init_player_height / 2));
+	modelMatrix *= Transform2D::Rotate(arrow_angle);
+	RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrix);
+
 
 	// TODO draw scoreboard
 	RenderMesh2D(meshes["game_area"], shaders["VertexColor"], glm::mat3(1));
@@ -77,6 +98,7 @@ void Tema1::Update(float deltaTimeSeconds)
 
 	// TODO draw objects
 	
+
 }
 
 void Tema1::FrameEnd()
@@ -89,12 +111,12 @@ void Tema1::OnInputUpdate(float deltaTime, int mods)
 	if (window->KeyHold(GLFW_KEY_W))
 	{
 		Position old = this->player_position;
-		this->player_position.setValue(old.x, glm::min(old.y + player_y_step, game_area_height - init_player_height + init_powerbar_height));
+		this->player_position.setValue(old.x, glm::min(old.y + player_y_step, player_max_y));
 	}
 	if (window->KeyHold(GLFW_KEY_S))
 	{
 		Position old = this->player_position;
-		this->player_position.setValue(old.x, glm::max(old.y - player_y_step, init_powerbar_height));
+		this->player_position.setValue(old.x, glm::max(old.y - player_y_step, player_min_y));
 	}
 
 }
@@ -111,7 +133,14 @@ void Tema1::OnKeyRelease(int key, int mods)
 
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
-	// add mouse move event
+	mouse_x = mouseX;
+	mouse_y = mouseY;
+
+	int center_x = player_position.x;
+	int center_y = player_position.y + (init_player_height / 2);
+
+	float tangent = ((center_y - mouseY) * 1.0f) / (center_x - mouseX);
+	arrow_angle = (-1) *  glm::atan(tangent);
 }
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)

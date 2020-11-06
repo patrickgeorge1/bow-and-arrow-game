@@ -32,5 +32,9 @@ protected:
 	glm::mat3 modelMatrix;
 	int game_area_height;
 	int game_area_width;
-
+	int player_min_y;
+	int player_max_y;
+	int mouse_x;
+	int mouse_y;
+	float arrow_angle;
 };
