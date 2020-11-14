@@ -68,8 +68,6 @@ void Tema1::Init()
 		Mesh* arroww = Object2D::CreateArrow("arrows" + i, corner, squareSide, glm::vec3(1, 0, 0.1f), false);
 		AddMeshToList(arroww);
 	}
-
-	arrow_projectils[0] = Arrow(Position(450, 250), 1.3f);
 }
 
 void Tema1::FrameStart()
@@ -166,13 +164,11 @@ void Tema1::OnKeyRelease(int key, int mods)
 void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 {
 	mouse_x = mouseX;
-	mouse_y = mouseY;
-
+	mouse_y = init_window_height - mouseY;
 	int center_x = player_position.x;
 	int center_y = player_position.y + (init_player_height / 2);
-
-	float tangent = ((center_y - mouseY) * 1.0f) / (center_x - mouseX);
-	arrow_angle = (-1) *  glm::atan(tangent);
+	float tangent = ((center_y - mouse_y) * 1.0f) / (center_x - mouse_x);
+	arrow_angle =  glm::atan(tangent);
 }
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
