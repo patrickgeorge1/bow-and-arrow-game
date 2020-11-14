@@ -13,6 +13,7 @@ namespace Object2D
 	Mesh* CreateRectangle(std::string name, glm::vec3 leftBottomCorner, float width, float height, glm::vec3 color, bool fill);
 	Mesh* CreatePlayer(std::string name, glm::vec3 leftBottomCorner, float height, glm::vec3 color, bool fill);
 	Mesh* CreateArrow(std::string name, glm::vec3 leftBottomCorner, float lenght, glm::vec3 color, bool fill);
+	Mesh* CreateBalloon(std::string name, glm::vec3 leftBottomCorner, float minRadius, glm::vec3 color, bool fill);
 
 }
 

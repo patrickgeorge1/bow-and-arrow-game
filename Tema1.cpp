@@ -5,8 +5,11 @@
 #include "Transform2D.h"
 #include "Object2D.h"
 #include "Defines.h"
+#include <cstdlib>
+#include <ctime>
 
 #define current_arrow arrow_projectils[i]
+#define current_balloon balloons[i]
 
 using namespace std;
 
@@ -68,6 +71,24 @@ void Tema1::Init()
 		Mesh* arroww = Object2D::CreateArrow("arrows" + i, corner, squareSide, glm::vec3(1, 0, 0.1f), false);
 		AddMeshToList(arroww);
 	}
+
+
+	corner = glm::vec3(0, 0, 0);
+	for (int i = 0; i < max_balloon_instances; i++) {
+		Mesh* balloonss;
+		if (i % 2 == 0) {
+			balloonss = Object2D::CreateBalloon("balloons" + i, corner, squareSide / 2, glm::vec3(1, 0.5f, 0.1f), false);
+			balloons[i].isRed = false;
+		}
+		else {
+			balloonss = Object2D::CreateBalloon("balloons" + i, corner, squareSide / 2, glm::vec3(1, 0, 0), false);
+			balloons[i].isRed = true;
+		}
+		AddMeshToList(balloonss);
+	}
+
+	srand((unsigned int)time(NULL));
+	begin = clock();
 }
 
 void Tema1::FrameStart()
@@ -97,11 +118,9 @@ void Tema1::Update(float deltaTimeSeconds)
 
 
 
-
-
 	// TODO draw arrow projectils
 	for (int i = 0; i < max_arrow_instances; i++) {
-		// if arrow is in screen just draw it
+		// draw existing arrow projectiles
 		if (current_arrow.isOutOfScreen == false) {
 			arrow_projectils[i].moveAndUpdatePosition();
 			modelMatrix = glm::mat3(1);
@@ -109,7 +128,7 @@ void Tema1::Update(float deltaTimeSeconds)
 			modelMatrix *= Transform2D::Rotate(current_arrow.angle);
 			RenderMesh2D(meshes["arrows" + i], shaders["VertexColor"], modelMatrix);
 
-			// if gets out stop drawing it
+			// check for screen exit
 			if (current_arrow.checkIfOutOfScreen()) {
 				current_arrow.isOutOfScreen = true;
 				cout << " out " << endl;
@@ -119,7 +138,34 @@ void Tema1::Update(float deltaTimeSeconds)
 
 
 	// TODO draw baloons and check for collision
+	for (int i = 0; i < max_balloon_instances; i++) {
+		// draw exiting balloons
+		if (!current_balloon.isOutOfScreen) {
 
+			current_balloon.climbUp();
+			modelMatrix = glm::mat3(1);
+			modelMatrix *= Transform2D::Translate(current_balloon.position.x, current_balloon.position.y);
+			RenderMesh2D(meshes["balloons" + i], shaders["VertexColor"], modelMatrix);
+
+			// check if them exited the screen
+			if (current_balloon.isOutOfScreenCheck()) {
+				current_balloon.isOutOfScreen = true;
+			}
+
+			// check for collision
+		}
+		else {
+			// maybe add them 
+			end = clock();
+			if (double(end - begin) / CLOCKS_PER_SEC > balloon_respawn_time) {
+				int randNum = rand() % (init_window_width - balloon_start_width + 1) + balloon_start_width;
+				current_balloon.resetPosition(randNum);
+				current_balloon.isOutOfScreen = false;
+				begin = end;
+			}
+			
+		}
+	}
 
 	// TODO draw scoreboard
 	RenderMesh2D(meshes["game_area"], shaders["VertexColor"], glm::mat3(1));
@@ -190,6 +236,7 @@ void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 			arrow_projectils[arrow_target].origin_position.y = player_position.y + init_player_height / 2;
 			arrow_projectils[arrow_target].isOutOfScreen = false;
 			arrow_projectils[arrow_target].distance_from_origin = 0;
+			arrow_projectils[arrow_target].step_distance = arrow_x_step;
 
 		}
 	}

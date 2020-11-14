@@ -6,6 +6,9 @@
 #include "utils/Position.h"
 #include "Defines.h"
 #include "utils/Arrow.h"
+#include "utils/Balloon.h"
+#include <ctime>
+
 
 class Tema1 : public SimpleScene {
 	public:
@@ -38,6 +41,10 @@ protected:
 	int mouse_x;
 	int mouse_y;
 	float arrow_angle;
+
+	clock_t begin;
+	clock_t end;
 	
 	Arrow arrow_projectils[max_arrow_instances];
+	Balloon balloons[max_balloon_instances];
 };

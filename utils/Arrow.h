@@ -17,7 +17,7 @@ public:
 	Position pos = Position();
 	glm::mat3 modelMatrix = glm::mat3(1);
 	bool isOutOfScreen = true;
-
+	int step_distance = 0;
 
 	// change position coordinates
 	void updatePosition();
