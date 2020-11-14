@@ -1,3 +1,6 @@
+#ifndef Position_HEADER
+#define Position_HEADER
+
 class Position {
 	public:
 		Position();
@@ -9,3 +12,5 @@ class Position {
 		int x;
 		int y;
 };
+
+#endif

@@ -5,6 +5,7 @@
 #include <Core/Engine.h>
 #include "utils/Position.h"
 #include "Defines.h"
+#include "utils/Arrow.h"
 
 class Tema1 : public SimpleScene {
 	public:
@@ -37,4 +38,6 @@ protected:
 	int mouse_x;
 	int mouse_y;
 	float arrow_angle;
+	
+	Arrow arrow_projectils[max_arrow_instances];
 };

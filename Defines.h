@@ -9,6 +9,8 @@
 
 // GAME PARAMETERS
 #define player_y_step 10
+#define arrow_x_step 5
+#define max_arrow_instances 4
 
 // CONSTANTS
 #define circle_point_distance 0.1f

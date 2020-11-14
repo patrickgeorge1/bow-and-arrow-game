@@ -6,6 +6,7 @@
 #include "Object2D.h"
 #include "Defines.h"
 
+#define current_arrow arrow_projectils[i]
 
 using namespace std;
 
@@ -49,7 +50,7 @@ void Tema1::Init()
 	Mesh* player = Object2D::CreatePlayer("player", corner, squareSide, glm::vec3(0, 1, 1), false);
 	AddMeshToList(player);
 
-	// arrow
+	// arrow trigger
 	corner = glm::vec3(0, 0, 0);
 	Mesh* arrow = Object2D::CreateArrow("arrow", corner, squareSide, glm::vec3(0, 1, 1), false);
 	AddMeshToList(arrow);
@@ -61,7 +62,14 @@ void Tema1::Init()
 	AddMeshToList(gameActionArea);
 
 
+	// arrow projectils
+	corner = glm::vec3(0, 0, 0);
+	for (int i = 0; i < max_arrow_instances; i++) {
+		Mesh* arroww = Object2D::CreateArrow("arrows" + i, corner, squareSide, glm::vec3(1, 0, 0.1f), false);
+		AddMeshToList(arroww);
+	}
 
+	arrow_projectils[0] = Arrow(Position(450, 250), 1.3f);
 }
 
 void Tema1::FrameStart()
@@ -90,13 +98,37 @@ void Tema1::Update(float deltaTimeSeconds)
 	RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrix);
 
 
+
+
+
+	// TODO draw arrow projectils
+	for (int i = 0; i < max_arrow_instances; i++) {
+		// if arrow is in screen just draw it
+		if (current_arrow.isOutOfScreen == false) {
+			arrow_projectils[i].moveAndUpdatePosition();
+			modelMatrix = glm::mat3(1);
+			modelMatrix *= Transform2D::Translate(current_arrow.pos.x, current_arrow.pos.y);
+			modelMatrix *= Transform2D::Rotate(current_arrow.angle);
+			RenderMesh2D(meshes["arrows" + i], shaders["VertexColor"], modelMatrix);
+
+			// if gets out stop drawing it
+			if (current_arrow.checkIfOutOfScreen()) {
+				current_arrow.isOutOfScreen = true;
+				cout << " out " << endl;
+			}
+		}
+	}
+
+
+	// TODO draw baloons and check for collision
+
+
 	// TODO draw scoreboard
 	RenderMesh2D(meshes["game_area"], shaders["VertexColor"], glm::mat3(1));
 
 	// TODO draw lifebar
 
 
-	// TODO draw objects
 	
 
 }
@@ -146,6 +178,25 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
 	// add mouse button press event
+	if (window->MouseHold(GLFW_MOUSE_BUTTON_1)) {
+		int arrow_target = -1;
+		for (int i = 0; i < max_arrow_instances; i++) {
+			if (current_arrow.isOutOfScreen) {
+				arrow_target = i;
+				break;
+			}
+		}
+
+		// strike an arrow
+		if (arrow_target != -1) {
+			arrow_projectils[arrow_target].angle = arrow_angle;
+			arrow_projectils[arrow_target].origin_position.x = player_position.x;
+			arrow_projectils[arrow_target].origin_position.y = player_position.y + init_player_height / 2;
+			arrow_projectils[arrow_target].isOutOfScreen = false;
+			arrow_projectils[arrow_target].distance_from_origin = 0;
+
+		}
+	}
 }
 
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
