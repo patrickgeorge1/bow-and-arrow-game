@@ -131,7 +131,6 @@ void Tema1::Update(float deltaTimeSeconds)
 			// check for screen exit
 			if (current_arrow.checkIfOutOfScreen()) {
 				current_arrow.isOutOfScreen = true;
-				cout << " out " << endl;
 			}
 		}
 	}
@@ -153,6 +152,25 @@ void Tema1::Update(float deltaTimeSeconds)
 			}
 
 			// check for collision
+			for (int ii = 0; ii < max_arrow_instances; ii++) {
+				Position arrowPos = arrow_projectils[ii].pos;
+				float arrow_lenght = init_player_height * (1.0f + (glm::sqrt(3) / 20.0f));
+				
+				// arrow top position now
+				// translated with ellipse center to origin, plus half of ellipse because center of ellipse was set be me being on bottom
+				float arrow_top_x = arrowPos.x + arrow_lenght * cos(arrow_projectils[ii].angle) - current_balloon.position.x;
+				float arrow_top_y = arrowPos.y + arrow_lenght * sin(arrow_projectils[ii].angle) - current_balloon.position.y - (init_player_height / 2);
+
+				float a = (0.7f) * (init_player_height / 2.0);
+				float b = init_player_height / 2.0;
+
+				if (((arrow_top_x * arrow_top_x) / (a * a)) + ((arrow_top_y * arrow_top_y) / (b * b)) <= 1) {
+					// collision
+					cout << "collision" << endl;
+				}
+
+			}
+
 		}
 		else {
 			// maybe add them 

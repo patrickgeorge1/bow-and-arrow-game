@@ -12,7 +12,7 @@
 #define arrow_x_step 15
 #define balloon_y_step 5
 #define max_arrow_instances 4
-#define max_balloon_instances 8
+#define max_balloon_instances 1
 
 // CONSTANTS
 #define circle_point_distance 0.1f
