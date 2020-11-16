@@ -12,9 +12,13 @@
 #define arrow_x_step 15
 #define balloon_y_step 5
 #define max_arrow_instances 4
-#define max_balloon_instances 1
+#define max_balloon_instances 8
 
 // CONSTANTS
 #define circle_point_distance 0.1f
 #define balloon_start_width 350
 #define balloon_respawn_time 1.0f
+#define balloon_default_scale 1.0f
+#define balloon_scale_step 0.01f
+#define balloon_red_points -1
+#define balloon_yellow_points 1

@@ -103,7 +103,9 @@ void Tema1::FrameStart()
 }
 
 void Tema1::Update(float deltaTimeSeconds)
-{
+{	
+	// check if is dead or not
+	if (life <= 0) exit(1);
 
 	// TODO draw player
 	modelMatrix = glm::mat3(1);
@@ -144,32 +146,48 @@ void Tema1::Update(float deltaTimeSeconds)
 			current_balloon.climbUp();
 			modelMatrix = glm::mat3(1);
 			modelMatrix *= Transform2D::Translate(current_balloon.position.x, current_balloon.position.y);
+			modelMatrix *= Transform2D::Scale(current_balloon.scale, current_balloon.scale);
 			RenderMesh2D(meshes["balloons" + i], shaders["VertexColor"], modelMatrix);
 
-			// check if them exited the screen
+			// check if exit the screen
 			if (current_balloon.isOutOfScreenCheck()) {
+				// reset wasHit and scale
 				current_balloon.isOutOfScreen = true;
+				balloons[i].wasHit = false;
+				balloons[i].scale = balloon_default_scale;
 			}
 
-			// check for collision
-			for (int ii = 0; ii < max_arrow_instances; ii++) {
-				Position arrowPos = arrow_projectils[ii].pos;
-				float arrow_lenght = init_player_height * (1.0f + (glm::sqrt(3) / 20.0f));
-				
-				// arrow top position now
-				// translated with ellipse center to origin, plus half of ellipse because center of ellipse was set be me being on bottom
-				float arrow_top_x = arrowPos.x + arrow_lenght * cos(arrow_projectils[ii].angle) - current_balloon.position.x;
-				float arrow_top_y = arrowPos.y + arrow_lenght * sin(arrow_projectils[ii].angle) - current_balloon.position.y - (init_player_height / 2);
+			// if was not hit check for collision
+			if (!current_balloon.wasHit) {
+				// check for collision
+				for (int ii = 0; ii < max_arrow_instances; ii++) {
+					Position arrowPos = arrow_projectils[ii].pos;
+					float arrow_lenght = init_player_height * (1.0f + (glm::sqrt(3) / 20.0f));
 
-				float a = (0.7f) * (init_player_height / 2.0);
-				float b = init_player_height / 2.0;
+					// arrow top position now
+					// translated with ellipse center to origin, plus half of ellipse because center of ellipse was set be me being on bottom
+					float arrow_top_x = arrowPos.x + arrow_lenght * cos(arrow_projectils[ii].angle) - current_balloon.position.x;
+					float arrow_top_y = arrowPos.y + arrow_lenght * sin(arrow_projectils[ii].angle) - current_balloon.position.y - (init_player_height / 2);
 
-				if (((arrow_top_x * arrow_top_x) / (a * a)) + ((arrow_top_y * arrow_top_y) / (b * b)) <= 1) {
-					// collision
-					cout << "collision" << endl;
+					float a = (0.7f) * (init_player_height / 2.0);
+					float b = init_player_height / 2.0;
+
+					if (((arrow_top_x * arrow_top_x) / (a * a)) + ((arrow_top_y * arrow_top_y) / (b * b)) <= 1) {
+						// collision
+						balloons[i].wasHit = true;
+						// TODO SCORE
+						if (current_balloon.isRed) score += balloon_red_points;
+						else score += balloon_yellow_points;
+						life--;
+						cout << "collision score " << score << endl;
+					}
 				}
-
 			}
+			else {
+				balloons[i].scale -= balloon_scale_step;
+				if (current_balloon.scale < 0) balloons[i].scale = 0.0f;
+			}
+
 
 		}
 		else {

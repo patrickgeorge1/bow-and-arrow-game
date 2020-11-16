@@ -41,6 +41,8 @@ protected:
 	int mouse_x;
 	int mouse_y;
 	float arrow_angle;
+	int score = 0;
+	int life = 3;
 
 	clock_t begin;
 	clock_t end;

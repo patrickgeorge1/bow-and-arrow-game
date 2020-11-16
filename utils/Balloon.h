@@ -1,4 +1,5 @@
 #include "Position.h"
+#include "../Defines.h"
 
 class Balloon
 {
@@ -11,6 +12,7 @@ public:
 	bool wasHit = false;
 	bool isOutOfScreen = true;
 	bool isRed = false;
+	float scale = balloon_default_scale;
 	 
 	void climbUp();
 	bool isOutOfScreenCheck();
