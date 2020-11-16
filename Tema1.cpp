@@ -8,8 +8,10 @@
 #include <cstdlib>
 #include <ctime>
 
+
 #define current_arrow arrow_projectils[i]
 #define current_balloon balloons[i]
+#define current_shuriken shurikens[i]
 
 using namespace std;
 
@@ -72,6 +74,20 @@ void Tema1::Init()
 		AddMeshToList(arroww);
 	}
 
+	corner = glm::vec3(0, 0, 0);
+	Mesh* powerBar = Object2D::CreateRectangle("powerbar", corner, 1, init_powerbar_height / 2, glm::vec3(0.1f, 0.1f, 0.1f), true);
+	AddMeshToList(powerBar);
+
+	
+
+
+	// shurikens
+	corner = glm::vec3(0, 0, 0);
+	for (int i = 0; i < max_shuriken_instances; i++) {
+		Mesh* shuriken = Object2D::CreateShuriken("shuriken" + i, corner, squareSide, glm::vec3(1, 0, 0.1f), false);
+		AddMeshToList(shuriken);
+	}
+
 
 	corner = glm::vec3(0, 0, 0);
 	for (int i = 0; i < max_balloon_instances; i++) {
@@ -89,6 +105,7 @@ void Tema1::Init()
 
 	srand((unsigned int)time(NULL));
 	begin = clock();
+	begin_shuriken = clock();
 }
 
 void Tema1::FrameStart()
@@ -104,9 +121,23 @@ void Tema1::FrameStart()
 
 void Tema1::Update(float deltaTimeSeconds)
 {	
-	// check if is dead or not
-	if (life <= 0) exit(1);
+	if (powerBarPressed) {
+		powerbar++;
+		if (powerbar > arrow_max_speed) powerbar = arrow_max_speed;
+	}
+	modelMatrix = glm::mat3(1);
+	modelMatrix *= Transform2D::Translate(init_powerbar_offset, 2 * init_powerbar_offset);
+	modelMatrix *= Transform2D::Scale(10 * powerbar, 1);
+	RenderMesh2D(meshes["powerbar"], shaders["VertexColor"], modelMatrix);
 
+	// check if is dead or not
+	if (life <= 0) {
+		cout << "Game over !" << endl;
+		cout << "Score " << score << " !" << endl;
+		exit(1);
+	}
+
+	
 	// TODO draw player
 	modelMatrix = glm::mat3(1);
 	modelMatrix *= Transform2D::Translate(player_position.x, player_position.y);
@@ -118,6 +149,50 @@ void Tema1::Update(float deltaTimeSeconds)
 	modelMatrix *= Transform2D::Rotate(arrow_angle);
 	RenderMesh2D(meshes["arrow"], shaders["VertexColor"], modelMatrix);
 
+
+
+
+	// TODO draw shurikens
+	for (int i = 0; i < max_shuriken_instances; i++) {
+		// is out of screen
+		if (current_shuriken.isOutOfScreen) 
+		{
+			end_shuriken = clock();
+			// check is enough time passed so I add new one to the screen
+			if (double(end_shuriken - begin_shuriken) / CLOCKS_PER_SEC > shuriken_respawn_time) {
+				begin_shuriken = end_shuriken;
+				shurikens[i].isOutOfScreen = false;
+				shurikens[i].pos.x = game_area_width + 3 * init_player_height;
+				shurikens[i].pos.y = rand() % (init_window_height - 10 + 1) + 01;
+			}
+		}
+		else {
+			// move it to the left
+			shurikens[i].moveShuriken();
+			shurikens[i].spinShuriken();
+
+
+			modelMatrix = glm::mat3(1);
+			modelMatrix *= Transform2D::Translate(current_shuriken.pos.x, current_shuriken.pos.y);
+			modelMatrix *= Transform2D::Rotate(current_shuriken.degrees);
+			RenderMesh2D(meshes["shuriken" + i], shaders["VertexColor"], modelMatrix);
+
+			// check for collision with player
+			if (current_shuriken.checkIfHitPlayer(player_position)) {
+				shurikens[i].isOutOfScreen = true;
+				life--;
+				cout << "you lost 1 life" << endl;
+			}
+
+
+			// check if is out of the screen
+			if (current_shuriken.checkIfOutOfTheScreen())
+			{
+				shurikens[i].isOutOfScreen = true;
+			}
+		}
+
+	}
 
 
 	// TODO draw arrow projectils
@@ -178,8 +253,7 @@ void Tema1::Update(float deltaTimeSeconds)
 						// TODO SCORE
 						if (current_balloon.isRed) score += balloon_red_points;
 						else score += balloon_yellow_points;
-						life--;
-						cout << "collision score " << score << endl;
+						cout << "score : " << score << endl;
 					}
 				}
 			}
@@ -255,32 +329,44 @@ void Tema1::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 
 void Tema1::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
+	powerBarPressed = true;
+
 	// add mouse button press event
 	if (window->MouseHold(GLFW_MOUSE_BUTTON_1)) {
-		int arrow_target = -1;
-		for (int i = 0; i < max_arrow_instances; i++) {
-			if (current_arrow.isOutOfScreen) {
-				arrow_target = i;
-				break;
-			}
-		}
-
-		// strike an arrow
-		if (arrow_target != -1) {
-			arrow_projectils[arrow_target].angle = arrow_angle;
-			arrow_projectils[arrow_target].origin_position.x = player_position.x;
-			arrow_projectils[arrow_target].origin_position.y = player_position.y + init_player_height / 2;
-			arrow_projectils[arrow_target].isOutOfScreen = false;
-			arrow_projectils[arrow_target].distance_from_origin = 0;
-			arrow_projectils[arrow_target].step_distance = arrow_x_step;
-
-		}
+		
 	}
 }
 
 void Tema1::OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods)
 {
+
 	// add mouse button release event
+
+
+	// shut arrow
+	int arrow_target = -1;
+	for (int i = 0; i < max_arrow_instances; i++) {
+		if (current_arrow.isOutOfScreen) {
+			arrow_target = i;
+			break;
+		}
+	}
+
+	// strike an arrow
+	if (arrow_target != -1) {
+		arrow_projectils[arrow_target].angle = arrow_angle;
+		arrow_projectils[arrow_target].origin_position.x = player_position.x;
+		arrow_projectils[arrow_target].origin_position.y = player_position.y + init_player_height / 2;
+		arrow_projectils[arrow_target].isOutOfScreen = false;
+		arrow_projectils[arrow_target].distance_from_origin = 0;
+		arrow_projectils[arrow_target].step_distance = arrow_x_step;
+		arrow_projectils[arrow_target].speed = powerbar;
+		
+	}
+
+	// set as released
+	powerBarPressed = false;
+	powerbar = arrow_x_step;
 }
 
 void Tema1::OnMouseScroll(int mouseX, int mouseY, int offsetX, int offsetY)

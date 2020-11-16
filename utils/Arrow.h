@@ -1,5 +1,6 @@
 
 #include "Position.h"
+#include "../Defines.h"
 #include <include/glm.h>
 
 class Arrow {
@@ -18,6 +19,7 @@ public:
 	glm::mat3 modelMatrix = glm::mat3(1);
 	bool isOutOfScreen = true;
 	int step_distance = 0;
+	int speed = arrow_x_step;
 
 	// change position coordinates
 	void updatePosition();

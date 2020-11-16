@@ -7,6 +7,7 @@
 #include "Defines.h"
 #include "utils/Arrow.h"
 #include "utils/Balloon.h"
+#include "utils/Shuriken.h"
 #include <ctime>
 
 
@@ -43,10 +44,15 @@ protected:
 	float arrow_angle;
 	int score = 0;
 	int life = 3;
+	int powerbar = arrow_x_step;
+	bool powerBarPressed = false;
 
 	clock_t begin;
 	clock_t end;
+	clock_t begin_shuriken;
+	clock_t end_shuriken;
 	
 	Arrow arrow_projectils[max_arrow_instances];
 	Balloon balloons[max_balloon_instances];
+	Shuriken shurikens[max_shuriken_instances];
 };

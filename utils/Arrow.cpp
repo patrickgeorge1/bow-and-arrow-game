@@ -38,7 +38,7 @@ void Arrow::updatePosition() {
 	pos.y = origin_position.y + distance_from_origin * sin(angle);
 }
 void Arrow::moveAndUpdatePosition() {
-	distance_from_origin = distance_from_origin + step_distance;
+	distance_from_origin = distance_from_origin + speed;
 	updatePosition();
 }
 
